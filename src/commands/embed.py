@@ -10,7 +10,7 @@ from io import BytesIO
 
 load_dotenv()
 
-embed = SlashCommandGroup("custom_command", "Manage custom guild commands")
+embed = SlashCommandGroup("embed", "Manage custom guild commands")
 
 @embed.command()
 async def create(ctx, command_name: str, embed_json: str):
@@ -55,18 +55,18 @@ async def delete(ctx, command_name):
 @embed.command()
 async def help(ctx: discord.ApplicationContext):
 
-    custom_command_id = utils.get(ctx.bot.commands, name="custom_command").id
+    embed_command_id = utils.get(ctx.bot.commands, name="embed").id
 
-    msg = f"Create a new command: </custom_command create:{custom_command_id}>\n" + \
-          f"Get a command: </custom_command get:{custom_command_id}>\n" + \
-          f"Delete a command: </custom_command delete:{custom_command_id}>\n" + \
-          f"List all commands: </custom_command list:{custom_command_id}>\n" + \
+    msg = f"Create a new command: </embed create:{embed_command_id}>\n" + \
+          f"Get a command: </embed get:{embed_command_id}>\n" + \
+          f"Delete a command: </embed delete:{embed_command_id}>\n" + \
+          f"List all commands: </embed list:{embed_command_id}>\n" + \
           "\nWhen creating a new command, you are required to submit the json of your command embed. " + \
           "The easiest way to do this is to visit [message.style](https://message.style/app/) and create one, it has a nice user interface for all kinds of discord json formatting. " + \
           "Keep in mind, [message.style](https://message.style/app/) is used for more than just embeds, so you will need to select ONLY the embed part of the `JSON` to submit when you create a custom command." 
     
     await ctx.respond(embed=Embed(
-        title="Custom Command Help Menu",
+        title="Guild Embed Command Help Menu",
         description=msg,
         color=Color.green()
     ), ephemeral=True)
@@ -86,7 +86,7 @@ async def list(ctx):
         ))
     else:
         await ctx.respond(embed=Embed(
-            description="No custom commands found for your guild. Try `/custom_command create` !",
+            description="No custom commands found for your guild. Try `/embed create` !",
             color=Color.red()
         )) 
 
