@@ -1,4 +1,4 @@
-from discord import SlashCommandGroup, Embed, Color
+from discord import SlashCommandGroup, Embed, Color, File
 from database import create_command, get_command, get_commands, delete_command
 from json import loads
 from dotenv import load_dotenv
@@ -52,6 +52,9 @@ async def delete(ctx, command_name):
     ))
     return
 
+
+help_file_1 = File(BytesIO(open("./src/dump/00.jpg", "rb").read()), "help_file_1.jpg")
+help_file_2 = File(BytesIO(open("./src/dump/01.jpg", "rb").read()), "help_file_2.jpg")
 @embed.command()
 async def help(ctx: discord.ApplicationContext):
 
@@ -69,11 +72,7 @@ async def help(ctx: discord.ApplicationContext):
         title="Guild Embed Command Help Menu",
         description=msg,
         color=Color.green()
-    ), ephemeral=True)
-    with open("./src/dump/00.jpg", "rb") as json_help:
-        await ctx.respond(ephemeral=True, files=[discord.File(BytesIO(json_help.read()), "json_help.png")])
-    with open("./src/dump/01.jpg", "rb") as json_help1:
-        await ctx.respond(ephemeral=True, files=[discord.File(BytesIO(json_help1.read()), "json_help_1.png")])
+    ), ephemeral=True, files=[help_file_1, help_file_2])
 
 @embed.command()
 async def list(ctx):
