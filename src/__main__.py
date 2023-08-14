@@ -1,7 +1,7 @@
 import discord
 import os
 import commands.help as help
-import commands.custom_commands as cc
+import commands.embed as cc
 from dotenv import load_dotenv
 from json import dumps
 from traceback import format_exception
@@ -33,7 +33,7 @@ async def on_application_command_error(ctx: discord.ApplicationContext, error):
 
 
 bot.add_application_command(help.help)
-bot.add_application_command(cc.custom_command)
+bot.add_application_command(cc.embed)
 bot.add_application_command(compiler.compile)
 
 bot.run(os.getenv("DISCORD_TOKEN"))  # Use DI

@@ -10,9 +10,9 @@ from io import BytesIO
 
 load_dotenv()
 
-custom_command = SlashCommandGroup("custom_command", "Manage custom guild commands")
+embed = SlashCommandGroup("custom_command", "Manage custom guild commands")
 
-@custom_command.command()
+@embed.command()
 async def create(ctx, command_name: str, embed_json: str):
     if len(command_name) > 10:
         await ctx.respond(embed=Embed(
@@ -32,7 +32,7 @@ async def create(ctx, command_name: str, embed_json: str):
     )
     await ctx.respond(embed=e)
 
-@custom_command.command()
+@embed.command()
 async def get(ctx, command_name: str):
     command = get_command(ctx.guild_id, command_name)
     if not command:
@@ -43,7 +43,7 @@ async def get(ctx, command_name: str):
         return
     await ctx.respond(embed=Embed.from_dict(loads(command)))
 
-@custom_command.command()
+@embed.command()
 async def delete(ctx, command_name):
     delete_command(ctx.guild_id, command_name)
     await ctx.respond(embed=Embed(
@@ -52,7 +52,7 @@ async def delete(ctx, command_name):
     ))
     return
 
-@custom_command.command()
+@embed.command()
 async def help(ctx: discord.ApplicationContext):
 
     custom_command_id = utils.get(ctx.bot.commands, name="custom_command").id
@@ -75,7 +75,7 @@ async def help(ctx: discord.ApplicationContext):
     with open("./src/dump/01.jpg", "rb") as json_help1:
         await ctx.respond(ephemeral=True, files=[discord.File(BytesIO(json_help1.read()), "json_help_1.png")])
 
-@custom_command.command()
+@embed.command()
 async def list(ctx):
     commands = get_commands(ctx.guild_id)
     if commands:
