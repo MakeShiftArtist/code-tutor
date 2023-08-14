@@ -122,3 +122,10 @@ def warn_user(guild_id, user_id, warning_type, reason):
         cursor.execute("INSERT INTO guild.warnings (id, user_id, warning,_type reason) VALUES (%s, %s, %s, %s)", (guild_id, user_id, warning_type, reason))
         connection.commit()
 
+def get_user_warnings(guild_id, user_id):
+    if not does_guild_exist(guild_id):
+        create_guild(guild_id)
+    
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT (*) FROM guild.warnings WHERE id = %s AND user_id = %s;", (guild_id, user_id))
+        return cursor.fetchall()
