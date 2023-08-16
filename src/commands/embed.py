@@ -72,7 +72,7 @@ async def help(ctx: discord.ApplicationContext):
         title="Guild Embed Command Help Menu",
         description=msg,
         color=Color.green()
-    ), ephemeral=True, files=[help_file_1, help_file_2])
+    ), ephemeral=False, files=[help_file_1, help_file_2])
 
 @embed.command()
 async def list(ctx):
