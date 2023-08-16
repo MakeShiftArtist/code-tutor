@@ -1,10 +1,8 @@
 from discord import SlashCommandGroup, Embed, Color, File
-from database import create_command, get_command, get_commands, delete_command
+from database import connection, Guild
 from json import loads
 from dotenv import load_dotenv
-from os import getenv
 import discord
-from traceback import format_exc
 import discord.utils as utils
 from io import BytesIO
 
@@ -25,7 +23,7 @@ async def create(ctx, command_name: str, embed_json: str):
             description=f"Your command name may not include spaces.", color=Color.red()
         ))
         return
-    create_command(ctx.guild_id, command_name, embed_json)
+    Guild(ctx.guild_id, connection).create_command(command_name, embed_json)
     e = Embed(
         description=f"{command_name} created.",
         color=Color.green()
@@ -34,7 +32,7 @@ async def create(ctx, command_name: str, embed_json: str):
 
 @embed.command()
 async def get(ctx, command_name: str):
-    command = get_command(ctx.guild_id, command_name)
+    command = Guild(ctx.guild_id, connection).get_embed(command_name)
     if not command:
         await ctx.respond(embed=Embed(
             description=f"`{command_name}` not found. Try creating it!",
@@ -45,7 +43,7 @@ async def get(ctx, command_name: str):
 
 @embed.command()
 async def delete(ctx, command_name):
-    delete_command(ctx.guild_id, command_name)
+    Guild(ctx.guild_id, connection).delete_command(command_name)
     await ctx.respond(embed=Embed(
         description=f"{command_name} deleted",
         color=Color.green()
@@ -55,6 +53,7 @@ async def delete(ctx, command_name):
 
 help_file_1 = File(BytesIO(open("./src/dump/00.jpg", "rb").read()), "help_file_1.jpg")
 help_file_2 = File(BytesIO(open("./src/dump/01.jpg", "rb").read()), "help_file_2.jpg")
+
 @embed.command()
 async def help(ctx: discord.ApplicationContext):
 
@@ -87,7 +86,7 @@ async def list(ctx):
         await ctx.respond(embed=Embed(
             description="No custom commands found for your guild. Try `/embed create` !",
             color=Color.red()
-        )) 
+        ))
 
 #@custom_command.error
 #async def on_error(ctx: discord.ApplicationContext, error: discord.DiscordException):

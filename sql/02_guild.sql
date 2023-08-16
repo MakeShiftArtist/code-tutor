@@ -4,24 +4,16 @@ CREATE SCHEMA guild;
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-CREATE TABLE guild.consent (
+CREATE TABLE guild.information (
     id BIGINT NOT NULL UNIQUE,
-    question_of_the_day VARCHAR,
-    error_forwarding BOOLEAN
+    appeals_channel_id BIGINT,
+    question_of_the_day_channel_id BIGINT
 );
 
-CREATE TABLE guild.commands (
+CREATE TABLE guild.embeds (
     id BIGINT NOT NULL,
     command_name VARCHAR NOT NULL,
     command_embed VARCHAR NOT NULL
-);
-
-CREATE TABLE guild.moderation (
-    id BIGINT NOT NULL UNIQUE,
-    max_warnings_before_kick SMALLINT,
-    max_warnings_before_ban SMALLINT,
-    allow_appeals BOOLEAN DEFAULT FALSE,
-    appeals_channel_id BIGINT
 );
 
 CREATE TABLE guild.warnings (
