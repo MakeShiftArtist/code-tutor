@@ -4,10 +4,11 @@ CREATE SCHEMA guild;
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-CREATE TABLE guild.information (
+CREATE TABLE guild.settings (
     id BIGINT NOT NULL UNIQUE,
     appeals_channel_id BIGINT,
-    question_of_the_day_channel_id BIGINT
+    question_of_the_day_channel_id BIGINT,
+    appeals_channel_id BIGINT
 );
 
 CREATE TABLE guild.embeds (
@@ -19,18 +20,6 @@ CREATE TABLE guild.embeds (
 CREATE TABLE guild.warnings (
     id BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
-    warning_type VARCHAR(10), -- ban, kick, warn, mute
     reason VARCHAR,
-    created_at TIMESTAMPTZ DEFAULT Now(),
-    expires_at TIMESTAMPTZ,
-    appeal_reason VARCHAR NOT NULL,
-    appeal_at TIMESTAMPTZ
+    created_at TIMESTAMPTZ DEFAULT Now()
 );
-
-CREATE TABLE guild.appeals (
-    id BIGINT NOT NULL,
-    user_id BIGINT NOT NULL,
-    reason VARCHAR NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT Now(),
-    UNIQUE(id, user_id) -- Only one submission per user, per guild.
-)

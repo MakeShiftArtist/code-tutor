@@ -33,6 +33,7 @@ class Languages:
         language_choice = ctx.options["language"]
         versions, language_id = self.get_version_and_id_by_name(language_choice)
         if versions:
+            versions.reverse()
             return ["latest", *versions]
         else: 
             return []
@@ -87,11 +88,12 @@ class CompilerApi:
     
 class RecompileButton(View):
 
-    def __init__(self, *items: Item, timeout: float | None = 180, disable_on_timeout: bool = False, ctx, user_message, compiler):
+    def __init__(self, *items: Item, timeout: float | None = 180, disable_on_timeout: bool = False, ctx, user_message, compiler, message_id_to_delete=None):
         super().__init__(*items, timeout=timeout, disable_on_timeout=disable_on_timeout)
-        self.ctx = ctx
+        self.ctx: ApplicationContext = ctx
         self.user_message = user_message
         self.compiler = compiler
+        self.message_id_to_delete=None
 
     @button(label="recompile", style=ButtonStyle.primary)
     async def recompile(self, button, interaction):
@@ -101,7 +103,16 @@ class RecompileButton(View):
         raw_code = parse_code_block(message.content)
         response = self.compiler(raw_code)
         embed = response.create_embed()
-        await interaction.response.send_message(embed=embed)
+        bot_message = await interaction.response.send_message(embed=embed)
+        bot_message.edit(view=RecompileButton(ctx=self.ctx, user_message=self.user_message, compiler=self.compiler, message_id_to_delete=bot_message.id))
+
+    @button(label="delete", style=ButtonStyle.danger)
+    async def delete(self, button, interaction):
+        try:
+            message = await self.ctx.fetch_message(self.message_id_to_delete)
+            await message.delete()
+        except Exception as e:
+            print(e)
 
 compiler_api = CompilerApi()
 languages = compiler_api.get_languages()
@@ -141,4 +152,4 @@ async def compile(ctx: ApplicationContext, language: Option(str, autocomplete=ut
         embed = response.create_embed()
         bot_message = await ctx.respond(embed=embed)
 
-        await bot_message.edit(embed=embed, view=RecompileButton(ctx=ctx, user_message=user_code_message, compiler=compiler))
+        await bot_message.edit(embed=embed, view=RecompileButton(ctx=ctx, user_message=user_code_message, compiler=compiler, message_id_to_delete=bot_message.interaction.id))

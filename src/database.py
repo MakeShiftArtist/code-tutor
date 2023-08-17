@@ -11,7 +11,6 @@ connection = psycopg2.connect(
 )
 
 existing_guilds = []
-valid_warning_types = ["warn", "kick", "ban"]
 
 class Guild:
     def __init__(self, guild_id: int, connection=connection) -> None:
@@ -24,7 +23,7 @@ class Guild:
             return True
         else:
             with self.con.cursor() as cursor:
-                cursor.execute("SELECT id FROM guild.information WHERE id = %s;", (self.guild_id,))
+                cursor.execute("SELECT id FROM guild.settings WHERE id = %s;", (self.guild_id,))
                 result = cursor.fetchone()
                 value = result[0] if result else None
                 if value:
@@ -34,17 +33,23 @@ class Guild:
 
     def create(self):
         with self.con.cursor() as cursor:
-            cursor.execute("INSERT INTO guild.information (id) VALUES (%s)", (self.guild_id,))
+            cursor.execute("INSERT INTO guild.settings (id) VALUES (%s)", (self.guild_id,))
             self.con.commit()
 
-    def question_of_the_day_channel(self, channel_id=None):
+    def set_question_of_the_day_channel(self, channel_id=None):
         if not self.exists():
             self.create()
 
         with self.con.cursor() as cursor:
-            cursor.execute("UPDATE guild.information SET question_of_the_day_channel_id=%s WHERE id=%s;", (channel_id, self.guild_id))
+            cursor.execute("UPDATE guild.settings SET question_of_the_day_channel_id=%s WHERE id=%s;", (channel_id, self.guild_id))
             self.con.commit()
-            
+
+    def get_question_of_the_day_channel(self):
+        if not self.exists():
+            self.create()
+        
+        with self.con.cursor() as cursor:
+            cursor.execute("SELECT question_of_the_day_channel_id FROM guild.settings WHERE id=%s;", (self.guild_id,))
     
     def get_embed(self, name: str):
         if not self.exists():
@@ -85,21 +90,27 @@ class Guild:
             self.create()
         
         with self.con.cursor() as cursor:
-            cursor.execute("UPDATE guild.information SET appeals_channel_id = %s WHERE id = %s;", (channel_id, self.guild_id))
+            cursor.execute("UPDATE guild.settings SET appeals_channel_id = %s WHERE id = %s;", (channel_id, self.guild_id))
             self.con.commit()
+    
+    def get_appeals_channel(self):
+        if not self.exist():
+            self.create()
         
-    def warn_user(self, user_id, reason, warning_type="warn"):
-        if warning_type not in valid_warning_types:
-            raise Exception(f"Warning types must be one of: {valid_warning_types}")
-        
+        with self.con.cursor() as cursor:
+            cursor.execute("SELECT appeals_channel_id FROM guild.settings WHERE id=%s;", (self.guild_id,))
+            value = cursor.fetchone()
+            return value[0] if value else value
+
+    def warn_user(self, user_id, reason):
+
         if not self.exists():
             self.create()
 
         with self.con.cursor() as cursor:
-            cursor.execute("INSERT INTO guild.warnings (id, user_id, warning_type, reason) VALUES (%s, %s, %s, %s)", (
+            cursor.execute("INSERT INTO guild.warnings (id, user_id, reason) VALUES (%s, %s, %s, %s)", (
                 self.guild_id,
                 user_id,
-                warning_type,
                 reason
             ))
             self.con.commit()
@@ -109,5 +120,5 @@ class Guild:
             self.create()
         
         with self.con.cursor() as cursor:
-            cursor.execute("SELECT user_id, warning_type, reason, created_at FROM guild.warnings WHERE id=%s;", (self.guild_id),)
+            cursor.execute("SELECT user_id, reason, created_at FROM guild.warnings WHERE id=%s;", (self.guild_id),)
             return cursor.fetchall()

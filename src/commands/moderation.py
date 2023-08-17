@@ -19,9 +19,11 @@ async def get_warnings(ctx: ApplicationContext, user: Option(User, "User whos wa
     def get_embed(user_id):
         warnings = get_warnings(ctx.guild_id, user_id)
         embed = Embed()
-        for guild_id, user_id, warning_type, reason, created_at in warnings:
+        i = 0
+        for guild_id, user_id, reason, created_at in warnings:
             if guild_id == guild_id:
-                embed.add_field(f"`{warning_type}` at `{created_at}`", reason,)
+                embed.add_field(name=f"Warning {i}", value=reason)
+                i += 1
         return embed
 
     if user:
