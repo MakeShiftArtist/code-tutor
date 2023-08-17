@@ -19,9 +19,12 @@ CREATE TABLE guild.embeds (
 CREATE TABLE guild.warnings (
     id BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
-    warning_type VARCHAR(10), -- ban, kick, warn
+    warning_type VARCHAR(10), -- ban, kick, warn, mute
     reason VARCHAR,
-    created_at TIMESTAMPTZ DEFAULT Now()
+    created_at TIMESTAMPTZ DEFAULT Now(),
+    expires_at TIMESTAMPTZ,
+    appeal_reason VARCHAR NOT NULL,
+    appeal_at TIMESTAMPTZ
 );
 
 CREATE TABLE guild.appeals (

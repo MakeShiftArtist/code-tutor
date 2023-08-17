@@ -8,6 +8,7 @@ from json import dumps
 from traceback import format_exception
 import commands.compiler as compiler
 from discord import Bot, Intents
+from utils.embeds import SuccessEmbed
 
 import database
 
@@ -20,6 +21,7 @@ bot = Bot(intents=intents)
 
 @bot.event
 async def on_ready():
+    #await bot.sync_commands()
     print(f"We have logged in as {bot.user}")
 
 @bot.event
@@ -37,9 +39,11 @@ async def on_application_command_error(ctx: discord.ApplicationContext, error):
         description=f"Error occurred while processing {ctx.user.display_name}'s command\n\nCommand Name:\n/{ctx.command.qualified_name}\n\nArguments:\n```json\n{arguments}```\n\nError:\n{traceback}"
     ))
 
-bot.add_application_command(developer.shutdown)
+
+bot.add_application_command(developer.developer)
 bot.add_application_command(help.help)
 bot.add_application_command(embed.embed)
 bot.add_application_command(compiler.compile)
+
 
 bot.run(os.getenv("DISCORD_TOKEN"))  # Use DI

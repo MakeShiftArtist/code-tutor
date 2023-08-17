@@ -14,7 +14,7 @@ existing_guilds = []
 valid_warning_types = ["warn", "kick", "ban"]
 
 class Guild:
-    def __init__(self, guild_id: int, connection) -> None:
+    def __init__(self, guild_id: int, connection=connection) -> None:
         self.guild_id = guild_id
         self.con = connection
         pass
@@ -60,24 +60,24 @@ class Guild:
             self.create()
         
         with self.con.cursor() as cursor:
-            cursor.execute("SELECT command_name FROM guild.commands WHERE id = %s", (self.guild_id,))
+            cursor.execute("SELECT command_name FROM guild.embeds WHERE id = %s", (self.guild_id,))
             value = cursor.fetchall()
             return [v[0] for v in value] if value else value
         
-    def delete_command(self, name: str):
+    def delete_embed(self, name: str):
         if not self.exists():
             self.create()
 
         with self.con.cursor() as cursor:
-            cursor.execute("DELETE FROM guild.commands WHERE id=%s AND command_name=%s;", (self.guild_id, name))
+            cursor.execute("DELETE FROM guild.embeds WHERE id=%s AND command_name=%s;", (self.guild_id, name))
             self.con.commit()
 
-    def create_command(self, name, embed):
+    def create_embed(self, name, embed):
         if not self.exists():
             self.create()
 
         with self.con.cursor() as cursor:
-            cursor.execute("INSERT INTO guild.commands (id, command_name, command_embed) VALUES (%s, %s, %s)", (self.guild_id, name, embed))
+            cursor.execute("INSERT INTO guild.embeds (id, command_name, command_embed) VALUES (%s, %s, %s)", (self.guild_id, name, embed))
             self.con.commit()
     
     def set_appeals_channel(self, channel_id=None):

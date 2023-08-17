@@ -2,11 +2,10 @@ from discord.ui.item import Item
 import requests
 from dotenv import load_dotenv
 from os import getenv
-from discord import Embed, Option, utils, Color, ApplicationContext, ButtonStyle
+from discord import Option, utils, ApplicationContext, ButtonStyle, AutocompleteContext
 from discord.ext import commands
 from discord.ui import View, button
-from discord.utils import get
-import datetime as dt
+from utils.embeds import SuccessEmbed, ErrorEmbed, UnsureEmbed
 
 load_dotenv()
 
@@ -24,7 +23,7 @@ class Languages:
     def get_name_by_language_id(self, language_id):
         for lang in self.languages:
             if lang["id"].lower() == language_id.lower():
-                return lang["id"]
+                return lang["name"]
 
     def language_autocomplete(self, ctx: ApplicationContext):
         language_choice = ctx.options["language"]
@@ -55,15 +54,11 @@ class CompilerResponse:
         return languages.get_name_by_language_id(self.language_id)
     
     def create_embed(self):
-        embed = Embed(
-            title="Compiler Results",
-            color=Color.green(),
-            timestamp=dt.datetime.now()
-        )
+        embed = SuccessEmbed(title="Compiler Results")
         embed.add_field(name="CPU Time", value=self.cpu_time, inline=False)
         embed.add_field(name="Memory Usage", value=self.memory, inline=False)
         embed.add_field(name="Result", value=self.convert_output(), inline=False)
-        embed.set_footer(text=f"{self.get_language_name()}, {self.language_version}")
+        embed.set_footer(text=f"{self.get_language_name()}, {self.language_version_name}")
         return embed
 
 class CompilerApi:
@@ -106,11 +101,7 @@ class RecompileButton(View):
         raw_code = parse_code_block(message.content)
         response = self.compiler(raw_code)
         embed = response.create_embed()
-        new_message = await interaction.response.send_message(embed=embed)
-        
-        await new_message.edit(embed=embed, view=RecompileButton(ctx=self.ctx, user_message=self.user_message, compiler=self.compiler))
-        #await interaction.response.send_message(embed=response.create_embed(), view=RecompileButton(ctx=self.ctx, user_message=self.user_message, compiler=self.compiler))
-
+        await interaction.response.send_message(embed=embed)
 
 compiler_api = CompilerApi()
 languages = compiler_api.get_languages()
@@ -123,31 +114,22 @@ async def compile(ctx: ApplicationContext, language: Option(str, autocomplete=ut
     versions, language_id = languages.get_version_and_id_by_name(language)
 
     if not language_id:
-        await ctx.respond(embed=Embed(
-            description=f"Invalid language name: '{language}'\n\nPlease use autocomplete options.",
-            color=Color.red()
-        ))
+        await ctx.respond(embed=ErrorEmbed(description=f"Invalid language name: '{language}'\n\nPlease use autocomplete options."))
         return
     elif version not in versions and version != "latest":
-        await ctx.respond(embed=Embed(
-            description=f"Invalid language version: '{version}.\n\nPlease use autocomplete options.'",
-            color=Color.red()
-        ))
+        await ctx.respond(embed=ErrorEmbed(description=f"Invalid language version: '{version}.\n\nPlease use autocomplete options.'"))
         return
     else:
         await ctx.defer()
-        message = await ctx.send(embed=Embed(
-            description="Please send your code block. Please use code block command for more information. Do ***not*** add a language in the code block format. Expires in 3 minutes.",
-            color=Color.green()
-        ))
+        help_message = UnsureEmbed(description="Please send your code block. Please use code block command for more information. Must use new lines after the start of your code block, and before the end.")
+        help_message.add_field(name="Example:", value="\\```\ncode here\n```")
+        message = await ctx.send(embed=help_message)
 
         def check(message):
             return message.author == ctx.author and message.channel == ctx.channel
 
         
         user_code_message = await ctx.bot.wait_for("message", check=check, timeout=180)
-        #print(code_block.content)
-        #await ctx.send(f"Hello {code_block.author}, \n{code_block.content}")
 
         raw_code = parse_code_block(user_code_message.content)
 
@@ -160,4 +142,3 @@ async def compile(ctx: ApplicationContext, language: Option(str, autocomplete=ut
         bot_message = await ctx.respond(embed=embed)
 
         await bot_message.edit(embed=embed, view=RecompileButton(ctx=ctx, user_message=user_code_message, compiler=compiler))
-        #print(code_block.content[4:][:-4])
