@@ -1,7 +1,27 @@
+####################
+###### PYTHON ######
+####################
 src/**/__pycache__/*
-.env
-.devenv/*
 
+####################
+##### SECRETS ######
+####################
+.env
+
+####################
+##### DATABASE #####
+####################
 *.db
 *.db-shm
 *.db-wal
+
+####################
+###### DEVENV ######
+####################
+.devenv*
+devenv.local.nix
+devenv.local.yaml
+.direnv
+
+# pre-commit
+.pre-commit-config.yaml

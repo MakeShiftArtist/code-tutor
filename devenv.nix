@@ -2,9 +2,14 @@
 {
   # https://devenv.sh/packages/
   packages = with pkgs; [
+    # Python formatter
     black
+    # Manage sqlite migrations
     sqlx-cli
   ];
+
+  # Stops warning you that a .env file is present
+  dotenv.disableHint = true;
 
   languages.python = {
     enable = true;
@@ -15,6 +20,7 @@
     venv.requirements = ./requirements.txt;
   };
 
+  # LOAD THIS BEFORE EDITING THIS FILE
   profiles.nix.module = {
     languages.nix = {
       enable = true;
@@ -38,7 +44,12 @@
   '';
 
   # https://devenv.sh/git-hooks/
+  # Ensures ruff linting rules are checked
   git-hooks.hooks.ruff.enable = true;
+  # Ensures python code is formatted
+  git-hooks.hooks.ruff-format.enable = true;
+  # Ensures THIS file is formatted
+  git-hooks.hooks.nixfmt.enable = true;
 
   # See full reference at https://devenv.sh/reference/options/
 }
