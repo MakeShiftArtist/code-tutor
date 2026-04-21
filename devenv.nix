@@ -2,8 +2,6 @@
 {
   # https://devenv.sh/packages/
   packages = with pkgs; [
-    # Python formatter
-    black
     # Manage sqlite migrations
     sqlx-cli
   ];
@@ -15,9 +13,9 @@
     enable = true;
     version = "3.14";
     lsp.enable = true;
-    lsp.package = pkgs.ruff;
-    venv.enable = true;
-    venv.requirements = ./requirements.txt;
+    # lsp.package = pkgs.ruff;
+    uv.enable = true;
+    uv.sync.enable = true;
   };
 
   # LOAD THIS BEFORE EDITING THIS FILE
@@ -48,6 +46,8 @@
   git-hooks.hooks.ruff.enable = true;
   # Ensures python code is formatted
   git-hooks.hooks.ruff-format.enable = true;
+  # Ensures python code is type safe
+  git-hooks.hooks.pyright.enable = true;
   # Ensures THIS file is formatted
   git-hooks.hooks.nixfmt.enable = true;
 
