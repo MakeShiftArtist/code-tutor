@@ -13,9 +13,10 @@
     enable = true;
     version = "3.14";
     lsp.enable = true;
-    # lsp.package = pkgs.ruff;
+    lsp.package = pkgs.ty;
     uv.enable = true;
     uv.sync.enable = true;
+    venv.enable = true;
   };
 
   # LOAD THIS BEFORE EDITING THIS FILE
