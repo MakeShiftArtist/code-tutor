@@ -1,23 +1,35 @@
-from discord import SlashCommandGroup, Option, User, Embed, Color, ApplicationContext
-from database import warn_user
-from datetime import T
+import database
+from discord import SlashCommandGroup, User, Embed, Color, ApplicationContext
+import discord
 
 moderation = SlashCommandGroup("moderation", "Moderation commands for the guild.")
 
-@moderation.command()
-async def warn(ctx, user: Option(User, "User to warn"), reason: str):
-    if ctx.author.guild_permissions.manage_messages: # add other moderator perms or possibly add a settable moderator role.
-        warn_user(ctx.guild_id, user.id, "warn", reason)
-        await ctx.respond(embed=Embed(
-            description=f"{user.name} was warned.",
-            color=Color.green()
-        ))
 
 @moderation.command()
-async def get_warnings(ctx: ApplicationContext, user: Option(User, "User whos warnings to get") = None):
+@discord.option("user", User, description="User to warn")
+async def warn(ctx: ApplicationContext, user: User, reason: str):
+    if isinstance(ctx.author, discord.User):
+        return await ctx.respond("Can only be used in guilds")
 
-    def get_embed(user_id):
-        warnings = get_warnings(ctx.guild_id, user_id)
+    if (
+        ctx.author.guild_permissions.manage_messages
+    ):  # add other moderator perms or possibly add a settable moderator role.
+        if ctx.guild_id is None:
+            return await ctx.respond("Can only be used in guilds")
+
+        db = database.Guild(ctx.guild_id)
+        db.warn_user(user.id, reason)
+        await ctx.respond(
+            embed=Embed(description=f"{user.name} was warned.", color=Color.green())
+        )
+
+
+@moderation.command()
+@discord.option("user", User, description="User to get warnings for")
+async def get_warnings(ctx: ApplicationContext, user: User):
+
+    async def get_embed(user_id):
+        warnings = await get_warnings(ctx.guild_id, user_id)
         embed = Embed()
         i = 0
         for guild_id, user_id, reason, created_at in warnings:
@@ -27,12 +39,15 @@ async def get_warnings(ctx: ApplicationContext, user: Option(User, "User whos wa
         return embed
 
     if user:
-        if ctx.author.guild_permissions.manage_messages: # add other moderator perms or possibly add a settable moderator role.
-            await ctx.respond(embed=get_embed(user.id))
+        if (
+            isinstance(ctx.author, discord.Member)
+            and ctx.author.guild_permissions.manage_messages
+        ):  # add other moderator perms or possibly add a settable moderator role.
+            await ctx.respond(embed=await get_embed(user.id))
         else:
-            await ctx.respond(embed=Embed(
-                description="Missing permissions to run this command."
-            ))
+            await ctx.respond(
+                embed=Embed(description="Missing permissions to run this command.")
+            )
         return
 
     await ctx.respond(embed=get_embed(ctx.author.id))
