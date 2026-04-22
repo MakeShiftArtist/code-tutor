@@ -47,8 +47,16 @@
   git-hooks.hooks.ruff.enable = true;
   # Ensures python code is formatted
   git-hooks.hooks.ruff-format.enable = true;
-  # Ensures python code is type safe
-  git-hooks.hooks.pyright.enable = true;
+  # Custom hook for astral's ty check to type check python code
+  git-hooks.hooks.ty = {
+    enable = true;
+
+    name = "astral ty";
+
+    entry = "ty check";
+
+    files = "\\.(py)$";
+  };
   # Ensures THIS file is formatted
   git-hooks.hooks.nixfmt.enable = true;
 
