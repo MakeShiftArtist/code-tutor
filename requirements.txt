@@ -1,4 +1,0 @@
-python-dotenv
-py-cord[voice]
-psycopg2-binary
-requests
